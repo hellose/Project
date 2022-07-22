@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="login">
+
+	<select id="selectOneUser"
+		parameterType="project.user.login.service.LoginVO"
+		resultType="project.user.login.service.LoginVO">
+		SELECT
+			USER_ID,
+			USER_NM,
+			USER_NICK,
+			USER_EMAIL
+		FROM SYS_USER_MASTR
+			WHERE
+				USER_ID = #{userId} AND USER_PW = #{userPw}
+				;
+	</select>
+
+	<insert id="insertOneUser"
+		parameterType="project.user.login.service.LoginVO">
+		INSERT INTO SYS_USER_MASTR
+		(USER_ID, USER_NM, USER_NICK, USER_PW) VALUES
+		(#{userId}, #{userNm}, #{userNick}, #{userPw})
+		;
+	</insert>
+	
+	
+
+
+</mapper>

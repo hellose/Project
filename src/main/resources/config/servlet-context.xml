@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd 
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+
+	<!-- 컴포넌트 스캔 -->
+	<context:component-scan base-package="project" />
+
+	<!-- 1. HandlerMapping -->
+	<!-- 스프링에서 기본 설정되는 BeanNameUrlHandlerMapping, RequestMappingHandlerMapping -->
+
+	<!-- 다른 HandlerMapping과 함께 사용할 때 우선 순위 order필드를 설정하기 위해서 선언 -->
+	<bean
+		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
+		<property name="order" value="1" />
+	</bean>
+
+	<!-- bean id="/url" 형식이면 맵핑 -->
+	<bean
+		class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
+		<property name="order" value="2" />
+	</bean>
+
+
+
+	<!-- 2. HandlerAdapter -->
+	<!-- 스프링에서 기본 설정되는 SimpleControllerHandlerAdapter, RequestMappingHandlerAdapter -->
+
+	<!-- json에 해당하는 http message body를 java 객체로 변환하기 위한 설정 -->
+	<!-- messageConverter 사용하기 위해 선언? -->
+	<bean
+		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<bean
+					class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+					<property name="supportedMediaTypes">
+						<list>
+							<value>text/html;charset=UTF-8</value>
+							<value>application/json;charset=UTF-8</value>
+						</list>
+					</property>
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+
+
+	<!-- 3. ViewResolver -->
+
+
+	<!-- BeanNameViewResolver (bean의 이름으로 viewResolver를 사용) -->
+	<!-- jsonView를 사용하기 위해 선언 -->
+	<bean
+		class="org.springframework.web.servlet.view.BeanNameViewResolver">
+		<property name="order" value="0" />
+	</bean>
+
+	<bean id="jsonView"
+		class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">
+		<property name="contentType"
+			value="application/json;charset=UTF-8">
+		</property>
+	</bean>
+
+	<!-- 스프링 기본 설정되는 InternalResourceViewResolver로 prefix,suffix프로퍼티는 설정되어 있지 
+		않다 -->
+	<!-- prefix, suffix를 사용하려면 선언해야 한다. -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/view" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+
+	<!-- Interceptor (로그인) -->
+	<bean id="authenticationInterceptor"
+		class="project.common.interceptor.AuthenticationInterceptor" />
+
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**/*.do" />
+			<!-- 테스트 요청 url 제외 -->
+			<mvc:exclude-mapping path="/test/**" />
+			<mvc:exclude-mapping path="/login/loginForm.do" />
+			<mvc:exclude-mapping
+				path="/login/registerForm.do" />
+			<mvc:exclude-mapping
+				path="/login/processLogin.do" />
+			<mvc:exclude-mapping
+				path="/login/registerUser.do" />
+			<ref bean="authenticationInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+
+
+
+
+
+</beans>
